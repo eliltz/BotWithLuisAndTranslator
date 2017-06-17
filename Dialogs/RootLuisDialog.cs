@@ -172,11 +172,16 @@
 
             context.Wait(this.MessageReceived);
         }
-        [LuisIntent("todovum")]
+        [LuisIntent("Todovum")]
         public async Task TodovumTodovum(IDialogContext context, LuisResult result)
         {
-
-            await context.PostAsync(" (: טודו טודו בום, הכל בסדר, טודובום");
+            Attachment attachment = new Attachment();
+            attachment.ContentType = "image/png";
+            attachment.ContentUrl = "http://images.nana10.co.il/upload/mediastock/img/16/0/287/287033.jpg";
+           var message = context.MakeMessage();
+            message.Attachments.Add(attachment);
+            message.Text = " (: טודו טודו בום, הכל בסדר, טודובום";
+            await context.PostAsync(message);
 
             context.Wait(this.MessageReceived);
         }
