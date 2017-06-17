@@ -91,7 +91,7 @@
             var userReply = await result;
             //while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
            // while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
-           if (userReply != "Which" && userReply != "Reject" && userReply != "undo")
+           if (userReply != "Which" && userReply != "Reject" && userReply != "Undo")
             {
                 PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה או 'ביטול פעולה' ' ");
             }
@@ -127,7 +127,7 @@
                     await context.PostAsync($"פעולת הדחייה נשלחה ותטופל.");
                     break;
 
-                case "undo":
+                case "Undo":
                     await context.PostAsync($"הבקשה בוטלה.");
                     break;
                 default:
