@@ -10,24 +10,20 @@
     using Microsoft.Bot.Builder.Luis;
     using Microsoft.Bot.Builder.Luis.Models;
     using Microsoft.Bot.Connector;
+    using System.Net.Http;
+    using System.Text.RegularExpressions;
+    using Newtonsoft.Json.Linq;
 
     [LuisModel("77fee18b-8bbe-4e7b-b054-d863143ab616", "31aa162117554361b119f1a76e403f85")]
     [Serializable]
     public class RootLuisDialog : LuisDialog<object>
     {
-        private const string EntityGeographyCity = "builtin.geography.city";
-
-        private const string EntityHotelName = "Hotel";
-
-        private const string EntityAirportCode = "AirportCode";
-
-        private IList<string> titleOptions = new List<string> { "“Very stylish, great stay, great staff”", "“good hotel awful meals”", "“Need more attention to little things”", "“Lovely small hotel ideally situated to explore the area.”", "“Positive surprise”", "“Beautiful suite and resort”" };
 
         [LuisIntent("")]
         [LuisIntent("None")]
         public async Task None(IDialogContext context, LuisResult result)
         {
-            string message = $"Sorry, I did not understand '{result.Query}'. Type 'help' if you need assistance.";
+            string message = $"סליחה, לא ממש הבנתי למה התכוונת ב'{result.Query}'. אפשר לרשום עזרה כדי לקבל מידע.";
 
             await context.PostAsync(message);
 
@@ -43,17 +39,18 @@
             //{
             //    await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
             //}
-           // else
-            if (result.Entities.Where(i=>i.Type==("EnrollmentRequestID")).FirstOrDefault() == null)
+            // else
+            if (result.Entities.Where(i => i.Type == ("EnrollmentRequestID")).FirstOrDefault() == null)
             {
                 await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
+
                 context.Wait(this.MessageReceived);
             }
             else
                 context.Call<object>(new CoursesDialog(), AfterCourseDialogIsDone);
 
 
-           // context.Wait(this.MessageReceived);
+            // context.Wait(this.MessageReceived);
         }
 
         private async Task AfterCourseDialogIsDone(IDialogContext context, IAwaitable<object> result)
@@ -66,7 +63,7 @@
         [LuisIntent("Reject")]
         public async Task RejectCourseEnrollmentIntent(IDialogContext context, LuisResult result)
         {
-            string message = $"הגעת למה שרצית";
+            string message = $"";
 
             await context.PostAsync(message);
 
@@ -75,7 +72,7 @@
         [LuisIntent("OpenFaultTicket")]
         public async Task OpenFaultTicket(IDialogContext context, LuisResult result)
         {
-            string message = $"הגעת למה שרצית";
+            string message = $"";
 
             await context.PostAsync(message);
 
@@ -84,21 +81,21 @@
         [LuisIntent("Approve")]
         public async Task Approve(IDialogContext context, IAwaitable<IMessageActivity> activity, LuisResult result)
         {
-            var message = await activity;
-            await context.PostAsync($"Welcome to the Hotels finder! We are analyzing your message: '{message.Text}'...");
+            //var message = await activity;
+            //await context.PostAsync($"Welcome to the Hotels finder! We are analyzing your message: '{message.Text}'...");
 
-            var hotelsQuery = new HotelsQuery();
+            //var hotelsQuery = new HotelsQuery();
 
-            EntityRecommendation cityEntityRecommendation;
+            //EntityRecommendation cityEntityRecommendation;
 
-            if (result.TryFindEntity(EntityGeographyCity, out cityEntityRecommendation))
-            {
-                cityEntityRecommendation.Type = "Destination";
-            }
+            //if (result.TryFindEntity(EntityGeographyCity, out cityEntityRecommendation))
+            //{
+            //    cityEntityRecommendation.Type = "Destination";
+            //}
 
-            var hotelsFormDialog = new FormDialog<HotelsQuery>(hotelsQuery, this.BuildHotelsForm, FormOptions.PromptInStart, result.Entities);
+            //var hotelsFormDialog = new FormDialog<HotelsQuery>(hotelsQuery, this.BuildHotelsForm, FormOptions.PromptInStart, result.Entities);
 
-            context.Call(hotelsFormDialog, this.ResumeAfterHotelsFormDialog);
+            //context.Call(hotelsFormDialog, this.ResumeAfterHotelsFormDialog);
         }
 
         [LuisIntent("GreetingIntent")]
@@ -106,9 +103,44 @@
         {
 
             await context.PostAsync(GetGreeting());
-           
-        }
 
+        }
+        [LuisIntent("Weather")]
+        public async Task Weather(IDialogContext context, LuisResult result)
+        {
+            if (result.Entities.Where(i => i.Type == ("city")).FirstOrDefault() == null)
+            {
+                await context.PostAsync("איפה?");
+
+                context.Wait(this.MessageReceived);
+                
+            }
+            else
+                using (var client = new HttpClient())
+                {
+                    var escapedLocation = Regex.Replace(result.Entities.Where(i => i.Type == ("city")).FirstOrDefault().Entity.ToString(), @"\W+", "_");
+
+                    dynamic response = JObject.Parse(await client.GetStringAsync($"http://api.wunderground.com/api/1910fe7aa3da5f4f/conditions/q/"+ escapedLocation+".json"));
+
+                    dynamic observation = response.current_observation;
+                    dynamic results = response.response.results;
+
+                    if (observation != null)
+                    {
+                        string displayLocation = observation.display_location?.full;
+                        decimal tempC = observation.temp_c;
+                        string weather = observation.weather;
+
+                        await context.PostAsync($"It is {weather} and {tempC} degrees in {displayLocation}.");
+                    }
+                    else if (results != null)
+                    {
+                        await context.PostAsync($"There is more than one '{result.Entities.Where(i => i.Type == ("city")).FirstOrDefault().ToString()}'. Can you be more specific?");
+                    }
+
+
+                }
+        }
         private string GetGreeting()
         {
             var greetings = new List<string> { "שלום", "מה שלומך?", "היי", "מה אפשר לעזור?", " לשירותך, מה אפשר לעזור Bot-IT" };
@@ -151,8 +183,34 @@
             return greeting;
 
         }
-        
-    
+
+        private async Task<string> GetCurrentWeather(string location)
+        {
+            using (var client = new HttpClient())
+            {
+                var escapedLocation = Regex.Replace(location, @"\W+", "_");
+
+                dynamic response = JObject.Parse(await client.GetStringAsync($"http://api.wunderground.com/api/<key>/conditions/q/{escapedLocation}.json"));
+
+                dynamic observation = response.current_observation;
+                dynamic results = response.response.results;
+
+                if (observation != null)
+                {
+                    string displayLocation = observation.display_location?.full;
+                    decimal tempC = observation.temp_c;
+                    string weather = observation.weather;
+
+                    return $"It is {weather} and {tempC} degrees in {displayLocation}.";
+                }
+                else if (results != null)
+                {
+                    return $"There is more than one '{location}'. Can you be more specific?";
+                }
+
+                return null;
+            }
+        }
 
 
         //[LuisIntent("NONONONON")]
@@ -193,7 +251,7 @@
         [LuisIntent("Help")]
         public async Task Help(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("Hi! Try asking me things like 'search hotels in Seattle', 'search hotels near LAX airport' or 'show me the reviews of The Bot Resort'");
+            await context.PostAsync("אפשר למשל לאשר השתלמות, או לפתוח תקלה ב2000. בקרוב עוד אופציות:)");
 
             context.Wait(this.MessageReceived);
         }

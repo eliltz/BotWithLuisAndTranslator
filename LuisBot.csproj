@@ -122,10 +122,12 @@
     <Compile Include="CommonTypes\ActionItemRequirments.cs" />
     <Compile Include="CommonTypes\CommonTypes.cs" />
     <Compile Include="CommonTypes\EnrollmentDef.cs" />
+    <Compile Include="CommonTypes\LuisJson.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="CopyJson.cs" />
     <Compile Include="Dialogs\CoursesDialog.cs" />
     <Compile Include="Dialogs\RootLuisDialog.cs" />
+    <Compile Include="FormFlow\EnrollmentApprovalQuery.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
