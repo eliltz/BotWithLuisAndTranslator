@@ -20,3 +20,23 @@ helper. maybe useful:
                 PromptDialog.Text(context, this.ResumeAfterPrompt, "Before get started, please tell me your name?");
                 return;
             }
+            
+            
+            
+  private async Task ResumeAfterPrompt(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var userName = await result;
+                this.userWelcomed = true;
+
+                await context.PostAsync($"Welcome {userName}! {HelpMessage}");
+
+                context.UserData.SetValue(ContextConstants.UserNameKey, userName);
+            }
+            catch (TooManyAttemptsException)
+            {
+            }
+
+            context.Wait(this.MessageReceivedAsync);
+        }
