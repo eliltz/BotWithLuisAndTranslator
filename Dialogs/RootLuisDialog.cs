@@ -38,13 +38,28 @@
         [LuisIntent("ApproveCourseEnrollment")]
         public async Task ApproveCourseEnrollmentIntent(IDialogContext context, LuisResult result)
         {
-            string message = $"ביקשת לאשר בקשת השתלמות";
+            string message = $"ביקשת לאשר בקשת השתלמות, אנא המתן...";
+            //if (result.Entities.Count == 0)
+            //{
+            //    await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
+            //}
+           // else
+            if (result.Entities.Where(i=>i.Type==("EnrollmentRequestID")).FirstOrDefault() == null)
+            {
+                await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
+                context.Wait(this.MessageReceived);
+            }
+            else
+                context.Call<object>(new CoursesDialog(), AfterCourseDialogIsDone);
 
-            //Check for missing entities
 
-            await context.PostAsync(result.ToString());
-            await context.PostAsync("אנא המתן");
-            await context.PostAsync(message + "asdasd");
+           // context.Wait(this.MessageReceived);
+        }
+
+        private async Task AfterCourseDialogIsDone(IDialogContext context, IAwaitable<object> result)
+        {
+            await context.PostAsync("האם תרצה לבצע משהו נוסף?");
+            // await context.PostAsync(message + "asdasd");
             context.Wait(this.MessageReceived);
         }
 

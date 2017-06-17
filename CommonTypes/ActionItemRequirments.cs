@@ -7,6 +7,6 @@ namespace LuisBot.CommonTypes
 {
     public class ActionItemRequirments
     {
-
+        
     }
 }

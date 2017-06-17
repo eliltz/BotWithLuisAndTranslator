@@ -120,8 +120,11 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="CommonTypes\ActionItemRequirments.cs" />
+    <Compile Include="CommonTypes\CommonTypes.cs" />
+    <Compile Include="CommonTypes\EnrollmentDef.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="CopyJson.cs" />
+    <Compile Include="Dialogs\CoursesDialog.cs" />
     <Compile Include="Dialogs\RootLuisDialog.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
