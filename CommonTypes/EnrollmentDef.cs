@@ -25,12 +25,12 @@ namespace LuisBot.CommonTypes
             {
                  new ActionItem()
                 {
-                    ActionItemMask = ActionItemMask.None,
+                    //ActionItemMask = ActionItemMask.None,
                     ActionToTake =  ActionToTake.Approve,//"ApproveCourseEnrollment",
                     MethodName = "ApproveCourseEnrollment",
-                    ParametersList = new List<ActionParameter>
+                    ParametersList = new List<ActionParameters>
                     {
-                        new ActionParameter { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
+                        new ActionParameters { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
                     },
                     SystemName = "CoursesEnrollmentSystem",
                     WsUrl = "" //TODO: Replace with url
@@ -39,12 +39,12 @@ namespace LuisBot.CommonTypes
 
                  new ActionItem()
                 {
-                    ActionItemMask = ActionItemMask.None,
+                    //ActionItemMask = ActionItemMask.None,
                     ActionToTake = ActionToTake.Reject,//"RejectCourseEnrollment",
                     MethodName = "RejectEnrollment",
-                    ParametersList = new List<ActionParameter>
+                    ParametersList = new List<ActionParameters>
                     {
-                        new ActionParameter { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
+                        new ActionParameters { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
                     },
                     SystemName = "CoursesEnrollmentSystem",
                     WsUrl = "" //TODO: Replace with url
@@ -52,12 +52,12 @@ namespace LuisBot.CommonTypes
                 },
                      new ActionItem()
                 {
-                    ActionItemMask = ActionItemMask.None,
+                   // ActionItemMask = ActionItemMask.None,
                     ActionToTake = ActionToTake.Enquire,//"ReConfirmCourseIdToEnroll",
                     MethodName = "GetCourseDetailsByID",
-                    ParametersList = new List<ActionParameter>
+                    ParametersList = new List<ActionParameters>
                     {
-                        new ActionParameter { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
+                        new ActionParameters { ParameterName = "EnrollmentRequestID", ParameterType = "Int" }
                     },
                     SystemName = "CoursesEnrollmentSystem",
                     WsUrl = "" //TODO: Replace with url

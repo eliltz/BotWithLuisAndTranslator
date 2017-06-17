@@ -13,6 +13,9 @@
     using System.Net.Http;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json.Linq;
+    using LuisBot.FormFlow;
+    using LuisBot.CommonTypes;
+    using static LuisBot.CommonTypes.CommonTypes;
 
     [LuisModel("77fee18b-8bbe-4e7b-b054-d863143ab616", "31aa162117554361b119f1a76e403f85")]
     [Serializable]
@@ -34,7 +37,7 @@
         [LuisIntent("ApproveCourseEnrollment")]
         public async Task ApproveCourseEnrollmentIntent(IDialogContext context, LuisResult result)
         {
-            string message = $"ביקשת לאשר בקשת השתלמות, אנא המתן...";
+
             //if (result.Entities.Count == 0)
             //{
             //    await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
@@ -43,15 +46,106 @@
             if (result.Entities.Where(i => i.Type == ("EnrollmentRequestID")).FirstOrDefault() == null)
             {
                 await context.PostAsync("חסרים פרטים באישור בקשת ההשתלמות");
-
+                //  EnrollmentApprovalQuery  enrollmentApprovalQuery = new EnrollmentApprovalQuery();
                 context.Wait(this.MessageReceived);
             }
             else
-                context.Call<object>(new CoursesDialog(), AfterCourseDialogIsDone);
+            {
+                string message = $"ביקשת לאשר בקשת השתלמות, אנא המתן...";
+                // context.Call<object>(new CoursesDialog(), AfterCourseDialogIsDone);
+                //gather the data.
+                ActionItem infoToSend = new ActionItem()
+                {
+                    //  ActionItemMask = ActionItemMask.None,
+                    ActionToTake = ActionToTake.Enquire,//"ApproveCourseEnrollment",
+                    MethodName = "GetCourseDetailsByID",
+                    ParametersList = new List<ActionParameters>
+                    {
+                        new ActionParameters { ParameterName = "EnrollmentRequestID", ParameterType = "Int", ParameterValue = result.Entities.Where(i => i.Type == ("EnrollmentRequestID")).FirstOrDefault().Entity }
+                    },
+                    SystemName = "CoursesEnrollmentSystem",
+                    WsUrl = "https://somekindOfWebAddress/blabla.asmx" //TODO: Replace with url
 
+                };
+                //call web service with this info.
+
+                //Get back an answer and handle it.
+                // await context.PostAsync(" . 'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה' ");
+
+                //Set the EnrollmentRequestID 
+                context.ConversationData.SetValue(ContextConstants.CN_EnrollmentRequestID, infoToSend.ParametersList[0].ParameterValue);
+                // context.Wait(AwaitingConfirmation);
+                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה' ");
+                //PromptDialog.Choice()
+                //What if i couldnt find the number? suggest others to approve or reject
+
+            }
 
             // context.Wait(this.MessageReceived);
         }
+
+        private async Task ResumeAfterPrompt(IDialogContext context, IAwaitable<string> result)
+        {
+            //try
+            // {
+            var userReply = await result;
+            while (userReply != "אשר" || userReply != "דחה")
+            {
+                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה' ");
+            }
+
+            switch (userReply)
+            {
+                case "אשר":
+                    {
+                        await context.PostAsync($"הבקשה נשלחה ותטופל.");
+                        //send approval to the web service
+                        ActionItem infoToSend = new ActionItem()
+                        {
+                            //  ActionItemMask = ActionItemMask.None,
+                            ActionToTake = ActionToTake.Approve,//"ApproveCourseEnrollment",
+                            MethodName = "ApproveCourseEnrollment",
+                            ParametersList = new List<ActionParameters>
+                                       {
+                                     new ActionParameters { ParameterName = "EnrollmentRequestID", ParameterType = "Int",
+                                      ParameterValue = context.ConversationData.GetValue<string>(ContextConstants.CN_EnrollmentRequestID)
+                                         }
+                                  },
+                            SystemName = "CoursesEnrollmentSystem",
+                            WsUrl = "https://somekindOfWebAddress/blabla.asmx" //TODO: Replace with url
+
+                        };
+                    }
+                    break;
+
+                case "דחה":
+
+                    break;
+                default:
+                    break;
+            }
+
+
+            //context.UserData.SetValue(ContextConstants.UserNameKey, userName);
+            // }
+            // catch (TooManyAttemptsException)
+            // {
+            // }
+
+            //  context.Wait(this.MessageReceivedAsync);
+        }
+
+        //private async Task AwaitingConfirmation(IDialogContext context, IAwaitable<object> result)
+        //{
+        //    var message = await result;
+        //    switch (message)
+        //    {
+
+        //        default:
+        //            break;
+        //    }
+
+        //}
 
         private async Task AfterCourseDialogIsDone(IDialogContext context, IAwaitable<object> result)
         {
@@ -69,6 +163,15 @@
 
             context.Wait(this.MessageReceived);
         }
+        [LuisIntent("todovum")]
+        public async Task TodovumTodovum(IDialogContext context, LuisResult result)
+        {
+
+            await context.PostAsync(" (: טודו טודו בום, הכל בסדר, טודובום");
+
+            context.Wait(this.MessageReceived);
+        }
+
         [LuisIntent("OpenFaultTicket")]
         public async Task OpenFaultTicket(IDialogContext context, LuisResult result)
         {
@@ -113,14 +216,14 @@
                 await context.PostAsync("איפה?");
 
                 context.Wait(this.MessageReceived);
-                
+
             }
             else
                 using (var client = new HttpClient())
                 {
                     var escapedLocation = Regex.Replace(result.Entities.Where(i => i.Type == ("city")).FirstOrDefault().Entity.ToString(), @"\W+", "_");
 
-                    dynamic response = JObject.Parse(await client.GetStringAsync($"http://api.wunderground.com/api/1910fe7aa3da5f4f/conditions/q/"+ escapedLocation+".json"));
+                    dynamic response = JObject.Parse(await client.GetStringAsync($"http://api.wunderground.com/api/1910fe7aa3da5f4f/conditions/q/" + escapedLocation + ".json"));
 
                     dynamic observation = response.current_observation;
                     dynamic results = response.response.results;

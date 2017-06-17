@@ -39,13 +39,13 @@ namespace LuisBot.CommonTypes
         public ActionToTake ActionToTake { get; set; }
         //List<string> actionsTagsList = new List<string>("אישור", "", "");//ReadFromFile
         public string MethodName { get; set; }
-        public List<ActionParameter> ParametersList { get; set; }
-        public ActionItemMask ActionItemMask { get; set; }
+        public List<ActionParameters> ParametersList { get; set; }
+      //  public ActionItemMask ActionItemMask { get; set; }
 
     }
 
     [Serializable]
-    public class ActionParameter
+    public class ActionParameters
     {
         public string ParameterName { get; set; }
         public string ParameterType { get; set; }
