@@ -1,0 +1,53 @@
+helper. maybe useful:
+
+https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-state
+
+By default, messages will not be persisted by the Microsoft Bot Framework. For stateful operations, you can use the Bot State API the following ways:
+
+Set userData. The persisted data will be available to the same user across different conversations.
+Set conversationData. The persisted data will be available to all the users within the same conversation.
+Set privateConversationData. The persisted data will be available to the given user in the given conversation.
+Set dialogData for storing temporary information in between the steps of a waterfall.
+According to the documentation, conversationData is disabled by default. If you want to use it, you have to set persistConversationData to true.
+
+tl;dr You have to take care of persistence for yourself. E.g
+
+        public async Task StartAsync(IDialogContext context)
+        {
+            string defaultCity;
+
+            if (!context.ConversationData.TryGetValue(ContextConstants.CityKey, out defaultCity))
+            {
+                defaultCity = "Seattle";
+                context.ConversationData.SetValue(ContextConstants.CityKey, defaultCity);
+            }
+
+            await context.PostAsync($"Welcome to the Search City bot. I'm currently configured to search for things in {defaultCity}");
+            context.Wait(this.MessageReceivedAsync);
+        }
+        
+            if (!context.UserData.TryGetValue(ContextConstants.UserNameKey, out userName))
+            {
+                PromptDialog.Text(context, this.ResumeAfterPrompt, "Before get started, please tell me your name?");
+                return;
+            }
+            
+            
+            
+  private async Task ResumeAfterPrompt(IDialogContext context, IAwaitable<string> result)
+        {
+            try
+            {
+                var userName = await result;
+                this.userWelcomed = true;
+
+                await context.PostAsync($"Welcome {userName}! {HelpMessage}");
+
+                context.UserData.SetValue(ContextConstants.UserNameKey, userName);
+            }
+            catch (TooManyAttemptsException)
+            {
+            }
+
+            context.Wait(this.MessageReceivedAsync);
+        }
