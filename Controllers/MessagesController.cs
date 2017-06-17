@@ -39,7 +39,7 @@
                         ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
 
                         var input = activity.Text;
-
+                     
                         Task.Run(async () =>
                         {
                             var accessToken = await GetAuthenticationToken(ApiKey);
