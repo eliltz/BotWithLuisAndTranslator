@@ -10,16 +10,12 @@
     using Dialogs;
     using Microsoft.Bot.Builder.Dialogs;
     using Microsoft.Bot.Connector;
-    using Services;
     using System.Net.Http.Headers;
     using System.Xml.Linq;
 
     [BotAuthentication]
     public class MessagesController : ApiController
     {
-        private static readonly bool IsSpellCorrectionEnabled = bool.Parse(WebConfigurationManager.AppSettings["IsSpellCorrectionEnabled"]);
-
-        private readonly BingSpellCheckService spellService = new BingSpellCheckService();
         string ApiKey = "e2e6074acad9425999d89ba796c85275";
         string targetLang = "en";
 

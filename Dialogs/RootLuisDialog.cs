@@ -101,7 +101,61 @@
             context.Call(hotelsFormDialog, this.ResumeAfterHotelsFormDialog);
         }
 
-        //[LuisIntent("ApproveCourseEnrollment")]
+        [LuisIntent("GreetingIntent")]
+        public async Task GreetingIntent(IDialogContext context, LuisResult result)
+        {
+
+            await context.PostAsync(GetGreeting());
+           
+        }
+
+        private string GetGreeting()
+        {
+            var greetings = new List<string> { "שלום", "מה שלומך?", "היי", "מה אפשר לעזור?", " לשירותך, מה אפשר לעזור Bot-IT" };
+            if (DateTime.Now.Hour < 12)
+            {
+                greetings.Add("בוקר טוב, מה אפשר לעזור?");
+            }
+            if (DateTime.Now.Hour > 11 && DateTime.Now.Hour < 12)
+            {
+                greetings.Add("בוקר טוב, בדרך לשולץ? מה אפשר לעזור?");
+            }
+            if (DateTime.Now.Hour > 13 && DateTime.Now.Hour < 14)
+            {
+                greetings.Add("קשה אחרי חדר האוכל הא? מה אוכל להועיל?");
+            }
+            if (DateTime.Now.Hour < 12)
+            {
+                greetings.Add("בוקר טוב!");
+            }
+            if (DateTime.Now.Hour > 15 && DateTime.Now.Hour < 17)
+            {
+                greetings.Add("אחר צהריים נעימים, מה אוכל לעזור?");
+
+            }
+            if (DateTime.Now.Hour > 17 && DateTime.Now.Hour < 20)
+            {
+                greetings.Add("ערב נעים, צריך משהו?");
+
+            }
+            if (DateTime.Now.Hour > 20 && DateTime.Now.Hour < 23)
+            {
+                greetings.Add("לילה טוב, מה אפשר לעזור?");
+
+            }
+
+            Random randomizer = new Random();
+            int index = randomizer.Next(greetings.Count);
+            string greeting = greetings[index];
+
+            return greeting;
+
+        }
+        
+    
+
+
+        //[LuisIntent("NONONONON")]
         //public async Task Reviews(IDialogContext context, LuisResult result)
         //{
         //    EntityRecommendation hotelEntityRecommendation;
