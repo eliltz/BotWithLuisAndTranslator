@@ -75,7 +75,7 @@
                 //Set the EnrollmentRequestID 
                 context.ConversationData.SetValue(ContextConstants.CN_EnrollmentRequestID, infoToSend.ParametersList[0].ParameterValue);
                 // context.Wait(AwaitingConfirmation);
-                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה' ");
+                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה או 'ביטול פעולה' ' ");
                 //PromptDialog.Choice()
                 //What if i couldnt find the number? suggest others to approve or reject
 
@@ -89,16 +89,18 @@
             //try
             // {
             var userReply = await result;
-            while (userReply != "אשר" || userReply != "דחה")
+            //while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
+           // while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
+           if (userReply != "Which" && userReply != "Reject" && userReply != "undo")
             {
-                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה' ");
+                PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה או 'ביטול פעולה' ' ");
             }
 
             switch (userReply)
             {
-                case "אשר":
+                case "Which":
                     {
-                        await context.PostAsync($"הבקשה נשלחה ותטופל.");
+                       
                         //send approval to the web service
                         ActionItem infoToSend = new ActionItem()
                         {
@@ -115,11 +117,18 @@
                             WsUrl = "https://somekindOfWebAddress/blabla.asmx" //TODO: Replace with url
 
                         };
+
+                        //send to the web service
+                        await context.PostAsync($"פעולת האישור נשלחה ותטופל.");
                     }
                     break;
 
-                case "דחה":
+                case "Reject":
+                    await context.PostAsync($"פעולת הדחייה נשלחה ותטופל.");
+                    break;
 
+                case "undo":
+                    await context.PostAsync($"הבקשה בוטלה.");
                     break;
                 default:
                     break;
