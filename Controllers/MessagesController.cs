@@ -64,6 +64,7 @@
             var response = Request.CreateResponse(HttpStatusCode.OK);
             return response;
         }
+
         static async Task<string> TranslateText(string inputText, string language, string accessToken)
         {
             string url = "http://api.microsofttranslator.com/v2/Http.svc/Translate";
@@ -95,6 +96,7 @@
                 return token;
             }
         }
+
         private Activity HandleSystemMessage(Activity message)
         {
             if (message.Type == ActivityTypes.DeleteUserData)

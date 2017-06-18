@@ -86,21 +86,19 @@
 
         private async Task ResumeAfterPrompt(IDialogContext context, IAwaitable<string> result)
         {
-            //try
-            // {
+
             var userReply = await result;
-            //while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
-           // while (userReply != "אשר" || userReply != "דחה" || userReply != "ביטול פעולה")
-           if (userReply != "Which" && userReply != "Reject" && userReply != "Undo")
+
+            if (userReply != "Which" && userReply != "Reject" && userReply != "Undo")
             {
                 PromptDialog.Text(context, ResumeAfterPrompt, "'האם אתה מעוניין לאשר את בקשת ההשתלמות בשם 'שם כלשהו שחזר מהשירות'? הקלד 'אשר' או 'דחה או 'ביטול פעולה' ' ");
             }
 
             switch (userReply)
             {
-                case "Which":
+                case "Which": //אשר
                     {
-                       
+
                         //send approval to the web service
                         ActionItem infoToSend = new ActionItem()
                         {
@@ -123,11 +121,11 @@
                     }
                     break;
 
-                case "Reject":
+                case "Reject"://דחה
                     await context.PostAsync($"פעולת הדחייה נשלחה ותטופל.");
                     break;
 
-                case "Undo":
+                case "Undo"://ביטול פעולה
                     await context.PostAsync($"הבקשה בוטלה.");
                     break;
                 default:
@@ -135,26 +133,7 @@
             }
 
 
-            //context.UserData.SetValue(ContextConstants.UserNameKey, userName);
-            // }
-            // catch (TooManyAttemptsException)
-            // {
-            // }
-
-            //  context.Wait(this.MessageReceivedAsync);
         }
-
-        //private async Task AwaitingConfirmation(IDialogContext context, IAwaitable<object> result)
-        //{
-        //    var message = await result;
-        //    switch (message)
-        //    {
-
-        //        default:
-        //            break;
-        //    }
-
-        //}
 
         private async Task AfterCourseDialogIsDone(IDialogContext context, IAwaitable<object> result)
         {
@@ -163,22 +142,15 @@
             context.Wait(this.MessageReceived);
         }
 
-        [LuisIntent("Reject")]
-        public async Task RejectCourseEnrollmentIntent(IDialogContext context, LuisResult result)
-        {
-            string message = $"";
 
-            await context.PostAsync(message);
 
-            context.Wait(this.MessageReceived);
-        }
         [LuisIntent("Todovum")]
         public async Task TodovumTodovum(IDialogContext context, LuisResult result)
         {
             Attachment attachment = new Attachment();
             attachment.ContentType = "image/png";
             attachment.ContentUrl = "http://images.nana10.co.il/upload/mediastock/img/16/0/287/287033.jpg";
-           var message = context.MakeMessage();
+            var message = context.MakeMessage();
             message.Attachments.Add(attachment);
             message.Text = " (: טודו טודו בום, הכל בסדר, טודובום";
             await context.PostAsync(message);
@@ -194,25 +166,6 @@
             await context.PostAsync(message);
 
             context.Wait(this.MessageReceived);
-        }
-        [LuisIntent("Approve")]
-        public async Task Approve(IDialogContext context, IAwaitable<IMessageActivity> activity, LuisResult result)
-        {
-            //var message = await activity;
-            //await context.PostAsync($"Welcome to the Hotels finder! We are analyzing your message: '{message.Text}'...");
-
-            //var hotelsQuery = new HotelsQuery();
-
-            //EntityRecommendation cityEntityRecommendation;
-
-            //if (result.TryFindEntity(EntityGeographyCity, out cityEntityRecommendation))
-            //{
-            //    cityEntityRecommendation.Type = "Destination";
-            //}
-
-            //var hotelsFormDialog = new FormDialog<HotelsQuery>(hotelsQuery, this.BuildHotelsForm, FormOptions.PromptInStart, result.Entities);
-
-            //context.Call(hotelsFormDialog, this.ResumeAfterHotelsFormDialog);
         }
 
         [LuisIntent("GreetingIntent")]
@@ -248,11 +201,13 @@
                         decimal tempC = observation.temp_c;
                         string weather = observation.weather;
 
-                        await context.PostAsync($"It is {weather} and {tempC} degrees in {displayLocation}.");
+                        string outputEng = $"It is {weather} and {tempC} degrees in {displayLocation}.";
+                        await context.PostAsync(await Services.TranslatorService.TranslateText(outputEng,"he"));
                     }
                     else if (results != null)
                     {
-                        await context.PostAsync($"There is more than one '{result.Entities.Where(i => i.Type == ("city")).FirstOrDefault().ToString()}'. Can you be more specific?");
+                        string outputEng = $"There is more than one '{result.Entities.Where(i => i.Type == ("city")).FirstOrDefault().ToString()}'. Can you be more specific?";
+                        await context.PostAsync(await Services.TranslatorService.TranslateText(outputEng, "he"));                       
                     }
 
 
@@ -317,12 +272,13 @@
                     string displayLocation = observation.display_location?.full;
                     decimal tempC = observation.temp_c;
                     string weather = observation.weather;
-
+                    //var accessToken = await GetAuthenticationToken(ApiKey);
+                    //var output = await TranslateText(input, targetLang, accessToken);
                     return $"It is {weather} and {tempC} degrees in {displayLocation}.";
                 }
                 else if (results != null)
                 {
-                    return $"There is more than one '{location}'. Can you be more specific?";
+                    return $" לא הצלחתי להבין מה המיקום הזה, תוכלו לדייק?'{location}' ";
                 }
 
                 return null;
@@ -330,158 +286,14 @@
         }
 
 
-        //[LuisIntent("NONONONON")]
-        //public async Task Reviews(IDialogContext context, LuisResult result)
-        //{
-        //    EntityRecommendation hotelEntityRecommendation;
-
-        //    if (result.TryFindEntity(EntityHotelName, out hotelEntityRecommendation))
-        //    {
-        //        await context.PostAsync($"Looking for reviews of '{hotelEntityRecommendation.Entity}'...");
-
-        //        var resultMessage = context.MakeMessage();
-        //        resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-        //        resultMessage.Attachments = new List<Attachment>();
-
-        //        for (int i = 0; i < 5; i++)
-        //        {
-        //            var random = new Random(i);
-        //            ThumbnailCard thumbnailCard = new ThumbnailCard()
-        //            {
-        //                Title = this.titleOptions[random.Next(0, this.titleOptions.Count - 1)],
-        //                Text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris odio magna, sodales vel ligula sit amet, vulputate vehicula velit. Nulla quis consectetur neque, sed commodo metus.",
-        //                Images = new List<CardImage>()
-        //                {
-        //                    new CardImage() { Url = "https://upload.wikimedia.org/wikipedia/en/e/ee/Unknown-person.gif" }
-        //                },
-        //            };
-
-        //            resultMessage.Attachments.Add(thumbnailCard.ToAttachment());
-        //        }
-
-        //        await context.PostAsync(resultMessage);
-        //    }
-
-        //    context.Wait(this.MessageReceived);
-        //}
-
         [LuisIntent("Help")]
         public async Task Help(IDialogContext context, LuisResult result)
         {
-            await context.PostAsync("אפשר למשל לאשר השתלמות, או לפתוח תקלה ב2000. בקרוב עוד אופציות:)");
+            await context.PostAsync(":-) כרגע אפשר לאשר\\לדחות השתלמות או לפתוח תקלה ב2000. בקרוב עוד אופציות ");
 
             context.Wait(this.MessageReceived);
         }
 
-        private IForm<HotelsQuery> BuildHotelsForm()
-        {
-            OnCompletionAsyncDelegate<HotelsQuery> processHotelsSearch = async (context, state) =>
-            {
-                var message = "Searching for hotels";
-                if (!string.IsNullOrEmpty(state.Destination))
-                {
-                    message += $" in {state.Destination}...";
-                }
-                else if (!string.IsNullOrEmpty(state.AirportCode))
-                {
-                    message += $" near {state.AirportCode.ToUpperInvariant()} airport...";
-                }
 
-                await context.PostAsync(message);
-            };
-
-            return new FormBuilder<HotelsQuery>()
-                .Field(nameof(HotelsQuery.Destination), (state) => string.IsNullOrEmpty(state.AirportCode))
-                .Field(nameof(HotelsQuery.AirportCode), (state) => string.IsNullOrEmpty(state.Destination))
-                .OnCompletion(processHotelsSearch)
-                .Build();
-        }
-
-        private async Task ResumeAfterHotelsFormDialog(IDialogContext context, IAwaitable<HotelsQuery> result)
-        {
-            try
-            {
-                var searchQuery = await result;
-
-                var hotels = await this.GetHotelsAsync(searchQuery);
-
-                await context.PostAsync($"I found {hotels.Count()} hotels:");
-
-                var resultMessage = context.MakeMessage();
-                resultMessage.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-                resultMessage.Attachments = new List<Attachment>();
-
-                foreach (var hotel in hotels)
-                {
-                    HeroCard heroCard = new HeroCard()
-                    {
-                        Title = hotel.Name,
-                        Subtitle = $"{hotel.Rating} starts. {hotel.NumberOfReviews} reviews. From ${hotel.PriceStarting} per night.",
-                        Images = new List<CardImage>()
-                        {
-                            new CardImage() { Url = hotel.Image }
-                        },
-                        Buttons = new List<CardAction>()
-                        {
-                            new CardAction()
-                            {
-                                Title = "More details",
-                                Type = ActionTypes.OpenUrl,
-                                Value = $"https://www.bing.com/search?q=hotels+in+" + HttpUtility.UrlEncode(hotel.Location)
-                            }
-                        }
-                    };
-
-                    resultMessage.Attachments.Add(heroCard.ToAttachment());
-                }
-
-                await context.PostAsync(resultMessage);
-            }
-            catch (FormCanceledException ex)
-            {
-                string reply;
-
-                if (ex.InnerException == null)
-                {
-                    reply = "You have canceled the operation.";
-                }
-                else
-                {
-                    reply = $"Oops! Something went wrong :( Technical Details: {ex.InnerException.Message}";
-                }
-
-                await context.PostAsync(reply);
-            }
-            finally
-            {
-                context.Done<object>(null);
-            }
-        }
-
-        private async Task<IEnumerable<Hotel>> GetHotelsAsync(HotelsQuery searchQuery)
-        {
-            var hotels = new List<Hotel>();
-
-            // Filling the hotels results manually just for demo purposes
-            for (int i = 1; i <= 5; i++)
-            {
-                var random = new Random(i);
-                Hotel hotel = new Hotel()
-                {
-                    Name = $"{searchQuery.Destination ?? searchQuery.AirportCode} Hotel {i}",
-                    Location = searchQuery.Destination ?? searchQuery.AirportCode,
-                    Rating = random.Next(1, 5),
-                    NumberOfReviews = random.Next(0, 5000),
-                    PriceStarting = random.Next(80, 450),
-                    Image = $"https://placeholdit.imgix.net/~text?txtsize=35&txt=Hotel+{i}&w=500&h=260"
-                };
-
-                hotels.Add(hotel);
-            }
-
-            hotels.Sort((h1, h2) => h1.PriceStarting.CompareTo(h2.PriceStarting));
-
-            return hotels;
-        }
     }
 }
